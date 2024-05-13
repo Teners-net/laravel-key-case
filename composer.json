@@ -44,5 +44,8 @@
     "require-dev": {
         "orchestra/testbench": "^9.0",
         "phpunit/phpunit": "^11.1"
+    },
+    "require": {
+        "php": "^8.3"
     }
 }
