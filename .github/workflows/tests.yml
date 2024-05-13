@@ -4,9 +4,6 @@ on:
     push:
     pull_request:
 
-permissions:
-    contents: read
-
 jobs:
   tests:
     runs-on: ubuntu-latest
@@ -14,16 +11,17 @@ jobs:
     strategy:
         fail-fast: true
         matrix:
-            php: [8.3]
+            php: [8.3, 8.2, 8.1, 8.0, 7.4, 7.3]
 
     name: PHP ${{ matrix.php }}
 
     steps:
         - name: Checkout code
-          uses: actions/checkout@v4
+          uses: actions/checkout@v2
 
         - name: Install Dependencies
-          run: composer install --prefer-dist --no-interaction --no-progress
+          run: |
+            composer install --dev --no-interaction --no-suggest
 
         - name: Execute tests
           run: vendor/bin/phpunit
