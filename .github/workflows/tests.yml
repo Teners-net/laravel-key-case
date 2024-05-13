@@ -8,20 +8,12 @@ jobs:
   tests:
     runs-on: ubuntu-latest
 
-    strategy:
-        fail-fast: true
-        matrix:
-            php: [8.3, 8.2, 8.1, 8.0, 7.4, 7.3]
-
-    name: PHP ${{ matrix.php }}
-
     steps:
         - name: Checkout code
-          uses: actions/checkout@v2
+          uses: actions/checkout@v4
 
         - name: Install Dependencies
-          run: |
-            composer install --dev --no-interaction --no-suggest
+          run: composer install --dev --no-interaction --no-progress
 
         - name: Execute tests
           run: vendor/bin/phpunit

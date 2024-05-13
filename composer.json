@@ -1,6 +1,6 @@
 {
     "name": "teners/laravel-key-case",
-    "description": "Middleware for automatic case transformation of request and response data in Laravel applications.",
+    "description": "Middleware for automatic case transformation of request and response data key in Laravel applications.",
     "type": "library",
     "license": "MIT",
     "homepage": "https://github.com/Teners-net/laravel-key-case#readme",

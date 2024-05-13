@@ -1,7 +1,12 @@
 Laravel Key Case
 =
+Middleware for automatic case transformation of request and response data in Laravel applications.
 
-
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/teners/laravel-key-case.svg?style=flat-square)](https://packagist.org/packages/teners/laravel-key-case)
+[![issues](https://img.shields.io/github/issues/Teners-net/laravel-key-case?style=flat-square)](https://github.com/Teners-net/laravel-key-case/issues)
+[![stars](https://img.shields.io/github/stars/Teners-net/laravel-key-case?style=flat-square)](https://github.com/Teners-net/laravel-key-case/issues)
+[![GitHub license](https://img.shields.io/github/license/Teners-net/laravel-key-case?style=flat-square)](https://github.com/Teners-net/laravel-key-case/blob/main/LICENSE.md)
+[![Total Downloads](https://img.shields.io/packagist/dt/teners/laravel-key-case.svg?style=flat-square)](https://packagist.org/packages/teners/laravel-key-case)
 
 
 ## Contributions
