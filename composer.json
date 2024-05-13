@@ -1,0 +1,37 @@
+{
+    "name": "teners/laravel-key-case",
+    "description": "Middleware for automatic case transformation of request and response data in Laravel applications.",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Teners\\LaravelKeyCase\\": "src"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Teners\\LaravelKeyCase\\Tests\\": "tests"
+        }
+    },
+    "authors": [
+        {
+            "name": "Emmanuel Adesina",
+            "email": "emmanuel@teners.net",
+            "homepage": "https://teners.net",
+            "role": "Developer"
+        }
+    ],
+    "scripts": {
+        "test": "phpunit"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Teners\\LaravelKeyCase\\LaravelKeyCaseServiceProvider"
+            ]
+        }
+    },
+    "require-dev": {
+        "orchestra/testbench": "^9.0"
+    }
+}
