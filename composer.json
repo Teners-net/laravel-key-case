@@ -42,7 +42,7 @@
         }
     },
     "require-dev": {
-        "orchestra/testbench": "^9.0",
-        "phpunit/phpunit": "^11.1"
+        "orchestra/testbench": "^6.23|^7.0|^8.0|^9.0",
+        "phpunit/phpunit": "^9.4|^10.1|^11.1"
     }
 }
