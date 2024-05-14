@@ -24,5 +24,8 @@ class LaravelKeyCaseServiceProvider extends ServiceProvider
 
     private function publishResources()
     {
+        $this->publishes([
+            __DIR__ . '/../config/laravel-key-case.php' => config_path('key-case.php'),
+        ], 'key-case-config');
     }
 }

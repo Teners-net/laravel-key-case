@@ -17,7 +17,6 @@ class TransformRequestMiddlewareTest extends TestCase
         $middleware  = new TransformRequestMiddleware();
 
         $middleware->handle($request, function () use ($request) {
-
             $this->assertArrayHasKey('first_name', $request->all());
             $this->assertArrayHasKey('last_name', $request->all());
 

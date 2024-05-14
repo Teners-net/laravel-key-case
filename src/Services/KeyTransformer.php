@@ -24,10 +24,8 @@ class KeyTransformer
 
     private $case;
 
-    public function __construct()
+    public function __construct(string $case)
     {
-        $case = config('app.response_case', 'snake');
-
         if (!in_array($case, self::CASES)) {
             throw new InvalidArgumentException('Invalid case ' . (string) $case);
         }

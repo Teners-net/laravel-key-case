@@ -22,7 +22,9 @@ class TransformResponseMiddleware
 
         $content = $response->getContent();
 
-        $converted = (new KeyTransformer())->convertKeys(json_decode($content));
+        $case = config('key-case.response_case', 'camel');
+
+        $converted = (new KeyTransformer($case))->convertKeys(json_decode($content));
 
         $response->setContent(json_encode($converted));
 

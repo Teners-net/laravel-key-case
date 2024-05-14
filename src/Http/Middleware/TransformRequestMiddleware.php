@@ -20,9 +20,12 @@ class TransformRequestMiddleware
     {
         $content = $request->all();
 
-        $converted = (new KeyTransformer())->convertKeys($content);
+        $case = config('key-case.request_case', 'snake');
+
+        $converted = (new KeyTransformer($case))->convertKeys($content);
 
         $request->replace($converted);
+
 
         return $next($request);
     }
