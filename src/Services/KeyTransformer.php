@@ -95,6 +95,8 @@ class KeyTransformer
             $result = $this->convertArrayKeys($data);
         } elseif (is_object($data)) {
             $result = $this->convertObjectProperties($data);
+        } else {
+            $result = $data;
         }
 
         return $result;
