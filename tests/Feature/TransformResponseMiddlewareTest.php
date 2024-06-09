@@ -2,6 +2,7 @@
 
 namespace Teners\LaravelKeyCase\Tests\Feature;
 
+use Illuminate\Http\Request;
 use Teners\LaravelKeyCase\Http\Middleware\TransformResponseMiddleware;
 use Teners\LaravelKeyCase\Tests\TestCase;
 
@@ -12,12 +13,21 @@ class TransformResponseMiddlewareTest extends TestCase
      */
     public function test_response_keys_Are_transformed()
     {
-        $request = $this->makeRequest();
+        $testData = [
+            'firstName' => "Emmanuel",
+            'lastName' => "Adesina",
+        ];
+
+        $request = Request::create(
+            "/",
+            'GET',
+            $testData
+        );
 
         $middleware  = new TransformResponseMiddleware();
 
-        $response = $middleware->handle($request, function () {
-            return response()->json($this->testData);
+        $response = $middleware->handle($request, function () use ($testData) {
+            return response()->json($testData);
         });
 
         $result = json_decode($response->getContent(), true);

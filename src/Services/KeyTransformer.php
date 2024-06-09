@@ -44,7 +44,7 @@ class KeyTransformer
 
         foreach ($data as $key => $value) {
             $converted[Str::{$this->case}($key)] = is_array($value) || is_object($value)
-                ? $this->convertValue($value)
+                ? $this->convertKeys($value)
                 : $value;
         }
 
@@ -61,27 +61,10 @@ class KeyTransformer
         $converted = [];
         foreach (get_object_vars($data) as $key => $value) {
             $converted[Str::{$this->case}($key)] = is_array($value) || is_object($value)
-                ? $this->convertValue($value)
+                ? $this->convertKeys($value)
                 : $value;
         }
         return (object) $converted;
-    }
-
-    /**
-     * Convert the keys or properties of nested arrays or objects to the specified case style.
-     *
-     * @param mixed $value The value to be converted (could be an array or an object).
-     * @return mixed The converted value.
-     */
-    private function convertValue($value): mixed
-    {
-        if (is_array($value)) {
-            return $this->convertArrayKeys($value);
-        } elseif (is_object($value)) {
-            return $this->convertObjectProperties($value);
-        } else {
-            return $value;
-        }
     }
 
     /**
@@ -92,13 +75,17 @@ class KeyTransformer
     public function convertKeys(mixed $data): mixed
     {
         if (is_array($data)) {
-            $result = $this->convertArrayKeys($data);
-        } elseif (is_object($data)) {
-            $result = $this->convertObjectProperties($data);
-        } else {
-            $result = $data;
+            return $this->convertArrayKeys($data);
         }
 
-        return $result;
+        if ($data instanceof \Illuminate\Http\UploadedFile) {
+            return $data;
+        }
+
+        if (is_object($data)) {
+            return $this->convertObjectProperties($data);
+        }
+
+        return $data;
     }
 }

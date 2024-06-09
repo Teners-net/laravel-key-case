@@ -12,18 +12,4 @@ abstract class TestCase extends TestbenchTestCase
     {
         $app['config']->set('key-case', require __DIR__.'/../config/laravel-key-case.php');
     }
-
-    public $testData = [
-        'firstName' => "Emmanuel",
-        'lastName' => "Adesina",
-    ];
-
-    public function makeRequest(): Request
-    {
-        return Request::create(
-            "/",
-            'GET',
-            $this->testData
-        );
-    }
 }
