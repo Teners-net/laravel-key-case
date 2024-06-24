@@ -4,6 +4,7 @@ namespace Teners\LaravelKeyCase\Tests\Feature;
 
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Config;
 use Teners\LaravelKeyCase\Http\Middleware\TransformRequestMiddleware;
 use Teners\LaravelKeyCase\Tests\TestCase;
 
@@ -60,6 +61,37 @@ class TransformRequestMiddlewareTest extends TestCase
             $this->assertArrayHasKey('profile_picture', $request->all());
 
             return response()->json(['success' => true]);
+        });
+    }
+
+    /**
+     * Test that request transformation is ignored for specified routes.
+     *
+     * @return void
+     */
+    public function test_transform_request_middleware_ignores_specified_routes()
+    {
+        Config::set('key-case.ignoreRequest', ['api/ignore-this-route']);
+
+        $middleware = new TransformRequestMiddleware();
+
+        $expectedRequest = [
+            'someKey' => 'someValue',
+            'some_other_key' => "Some value",
+            'SomeOtherKinds' => "SomeOtherKindsOfValue"
+        ];
+
+        $request = Request::create(
+            'api/ignore-this-route',
+            'POST',
+            $expectedRequest
+        );
+
+        $middleware->handle($request, function ($req) use ($expectedRequest) {
+
+            $this->assertEquals($expectedRequest, $req->all());
+
+            return response($req->all());
         });
     }
 }

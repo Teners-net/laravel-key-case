@@ -29,4 +29,19 @@ return [
      *
      */
     'request_case' => env('REQUEST_CASE', 'snake'),
+
+    /**
+     * Routes to ignore for both request and transformation
+     */
+    'ignore' => [],
+
+    /**
+     * List of routes to ignore for request transformation
+     */
+    'ignoreRequest' => [],
+
+    /**
+     * List of routes to ignore for response transformation
+     */
+    'ignoreResponse' => [],
 ];

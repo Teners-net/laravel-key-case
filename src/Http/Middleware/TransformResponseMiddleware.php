@@ -20,6 +20,12 @@ class TransformResponseMiddleware
     {
         $response = $next($request);
 
+        $currentRoute = $request->path();
+
+        if (in_array($currentRoute, $this->getRoutesToIgnore())) {
+            return $response;
+        }
+
         $content = $response->getContent();
 
         $case = config('key-case.response_case', 'camel');
@@ -29,5 +35,21 @@ class TransformResponseMiddleware
         $response->setContent(json_encode($converted));
 
         return $response;
+    }
+
+    /**
+     * Get the list of routes to ignore for request transformation.
+     *
+     * @return array
+     */
+    private function getRoutesToIgnore(): array
+    {
+        $ignoreRoutes = config('key-case.ignore', []);
+        $ignoreResponseRoutes = config('key-case.ignoreResponse', []);
+
+        return array_merge(
+            $ignoreRoutes,
+            $ignoreResponseRoutes,
+        );
     }
 }

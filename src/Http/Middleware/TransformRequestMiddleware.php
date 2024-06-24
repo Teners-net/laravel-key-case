@@ -20,6 +20,12 @@ class TransformRequestMiddleware
     {
         $content = $request->all();
 
+        $currentRoute = $request->path();
+
+        if (in_array($currentRoute, $this->getRoutesToIgnore())) {
+            return $next($request);
+        }
+
         $case = config('key-case.request_case', 'snake');
 
         $converted = (new KeyTransformer($case))->convertKeys($content);
@@ -28,5 +34,21 @@ class TransformRequestMiddleware
 
 
         return $next($request);
+    }
+
+    /**
+     * Get the list of routes to ignore for request transformation.
+     *
+     * @return array
+     */
+    private function getRoutesToIgnore(): array
+    {
+        $ignoreRoutes = config('key-case.ignore', []);
+        $ignoreRequestRoutes = config('key-case.ignoreRequest', []);
+
+        return array_merge(
+            $ignoreRoutes,
+            $ignoreRequestRoutes,
+        );
     }
 }
