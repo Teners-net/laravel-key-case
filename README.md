@@ -1,6 +1,6 @@
 Laravel Key Case
 =
-Middleware for automatic case transformation of request and response data in Laravel applications.
+A Laravel package that transforms request and response data keys.
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/teners/laravel-key-case.svg?style=flat-square)](https://packagist.org/packages/teners/laravel-key-case)
 [![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/Teners-net/laravel-key-case/tests.yml?branch=main&label=Tests)](https://github.com/Teners-net/laravel-key-case/actions?query=workflow%3ATests+branch%3Amain)
@@ -30,9 +30,9 @@ You can then customize what case to use for each of the request and the response
 
 #### Use the middlewares
 
-This package comes with two middlewares
-- `TransformResponseMiddleware`: Transforms response data
-- `TransformRequestMiddleware`: Transforms request data
+This package includes two middlewares
+- `TransformResponseMiddleware`: Transforms response data keys.
+- `TransformRequestMiddleware`: Transforms request data keys.
 
 You can register their aliases (or use them dirrectly on the api route group if you are using them through the api) for easy reference elsewhere in your app:
 
@@ -79,6 +79,29 @@ In Laravel 9 and 10 you can add them in `/app/Http/Kernel.php`:
     ];
 ```
 
+### Ignoring Routes
+You can specify routes to be ignored for request and response transformation in the configuration file:
+
+```php
+return [
+    // Other configuration options...
+
+    'ignore' => [
+        // Common routes to ignore for both request and response transformation
+    ],
+
+    'ignoreRequest' => [
+        // List of routes to ignore for request transformation
+    ],
+
+    'ignoreResponse' => [
+        // List of routes to ignore for response transformation
+    ],
+];
+```
+
+Route listed in the `ignore` will not be transformed for bothe the resquest and response, while those in the `ignoreRequest` will not be transformed for only the request, and those in `ignoreResponse` will be ignored for the response transformation.
+
 ## Contributions
 Contributions are **welcome** via Pull Requests on [Github](https://github.com/Teners-net/laravel-key-case).
 - Please document any change you made as neccesary in the [README.md](README.md).
@@ -88,6 +111,7 @@ Contributions are **welcome** via Pull Requests on [Github](https://github.com/T
 Please report any issue you encounter in using the package through the [Github Issues](https://github.com/Teners-net/laravel-key-case/issues) tab.
 
 ## Testing
+To run tests, use:
 
 ``` bash
 composer test
