@@ -38,10 +38,10 @@ return [
     /**
      * List of routes to ignore for request transformation
      */
-    'ignoreRequest' => [],
+    'ignore_request' => [],
 
     /**
      * List of routes to ignore for response transformation
      */
-    'ignoreResponse' => [],
+    'ignore_response' => [],
 ];

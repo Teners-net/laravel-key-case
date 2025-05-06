@@ -71,7 +71,7 @@ class TransformRequestMiddlewareTest extends TestCase
      */
     public function test_transform_request_middleware_ignores_specified_routes()
     {
-        Config::set('key-case.ignoreRequest', ['api/ignore-this-route']);
+        Config::set('key-case.ignore_request', ['api/ignore-this-route']);
 
         $middleware = new TransformRequestMiddleware();
 

@@ -45,7 +45,7 @@ class TransformResponseMiddleware
     private function getRoutesToIgnore(): array
     {
         $ignoreRoutes = config('key-case.ignore', []);
-        $ignoreResponseRoutes = config('key-case.ignoreResponse', []);
+        $ignoreResponseRoutes = config('key-case.ignore_response', []);
 
         return array_merge(
             $ignoreRoutes,

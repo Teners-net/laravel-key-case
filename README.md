@@ -90,17 +90,17 @@ return [
         // Common routes to ignore for both request and response transformation
     ],
 
-    'ignoreRequest' => [
+    'ignore_request' => [
         // List of routes to ignore for request transformation
     ],
 
-    'ignoreResponse' => [
+    'ignore_response' => [
         // List of routes to ignore for response transformation
     ],
 ];
 ```
 
-Route listed in the `ignore` will not be transformed for bothe the resquest and response, while those in the `ignoreRequest` will not be transformed for only the request, and those in `ignoreResponse` will be ignored for the response transformation.
+Route listed in the `ignore` will not be transformed for bothe the resquest and response, while those in the `ignore_request` will not be transformed for only the request, and those in `ignore_response` will be ignored for the response transformation.
 
 ## Contributions
 Contributions are **welcome** via Pull Requests on [Github](https://github.com/Teners-net/laravel-key-case).
