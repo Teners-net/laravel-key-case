@@ -4,6 +4,7 @@ namespace Teners\LaravelKeyCase\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 use Teners\LaravelKeyCase\Services\KeyTransformer;
 
@@ -25,8 +26,18 @@ class TransformRequestMiddleware
 
         $transformer = $this->getTransformer();
 
-        $converted = $transformer->convertKeys($content);
-        $request->replace($converted);
+        try {
+            $converted = $transformer->convertKeys($content);
+            $request->replace($converted);
+        } catch (\Exception $e) {
+            config('app.debug') && throw new $e;
+
+            Log::warning('Key transformation failed for request', [
+                'route' => $request->path(),
+                'error' => $e->getMessage(),
+                'trace' => $e->getTrace(),
+            ]);
+        }
 
         return $next($request);
     }

@@ -5,6 +5,7 @@ namespace Teners\LaravelKeyCase\Http\Middleware;
 use Closure;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 use Teners\LaravelKeyCase\Services\KeyTransformer;
 
@@ -31,10 +32,20 @@ class TransformResponseMiddleware
 
         $content = $response->getContent();
 
-        $transformer = $this->getTransformer();
-        $converted = $transformer->convertKeys(json_decode($content));
+        try {
+            $transformer = $this->getTransformer();
+            $converted = $transformer->convertKeys(json_decode($content));
 
-        $response->setContent(json_encode($converted));
+            $response->setContent(json_encode($converted, JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION));
+        } catch (\Exception $e) {
+            config('app.debug') && throw new $e;
+
+            Log::warning('Key transformation failed for response', [
+                'route' => $request->path(),
+                'error' => $e->getMessage(),
+                'trace' => $e->getTrace(),
+            ]);
+        }
 
         return $response;
     }
@@ -50,7 +61,7 @@ class TransformResponseMiddleware
 
         $contentType = $response->headers->get('content-type', '');
         return str_contains($contentType, 'application/json') ||
-               str_contains($contentType, 'text/json');
+            str_contains($contentType, 'text/json');
     }
 
     /**
