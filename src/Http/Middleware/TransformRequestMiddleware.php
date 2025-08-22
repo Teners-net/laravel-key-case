@@ -4,6 +4,7 @@ namespace Teners\LaravelKeyCase\Http\Middleware;
 
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 use Teners\LaravelKeyCase\Services\KeyTransformer;
 
@@ -11,44 +12,51 @@ class TransformRequestMiddleware
 {
     /**
      * Handle an incoming request.
-     *
-     * @param Request $request
-     * @param \Closure $next
-     * @return mixed
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $content = $request->all();
-
-        $currentRoute = $request->path();
-
-        if (in_array($currentRoute, $this->getRoutesToIgnore())) {
+        if ($this->shouldIgnoreRoute($request->path())) {
             return $next($request);
         }
 
-        $case = config('key-case.request_case', 'snake');
+        $content = $request->all();
+        if (empty($content)) {
+            return $next($request);
+        }
 
-        $converted = (new KeyTransformer($case))->convertKeys($content);
+        $transformer = $this->getTransformer();
 
-        $request->replace($converted);
+        try {
+            $converted = $transformer->convertKeys($content);
+            $request->replace($converted);
+        } catch (\Exception $e) {
+            config('app.debug') && throw new $e;
 
+            Log::warning('Key transformation failed for request', [
+                'route' => $request->path(),
+                'error' => $e->getMessage(),
+                'trace' => $e->getTrace(),
+            ]);
+        }
 
         return $next($request);
     }
 
     /**
-     * Get the list of routes to ignore for request transformation.
-     *
-     * @return array
+     * Get transformer instance
      */
-    private function getRoutesToIgnore(): array
+    private function getTransformer(): KeyTransformer
     {
-        $ignoreRoutes = config('key-case.ignore', []);
-        $ignoreRequestRoutes = config('key-case.ignore_request', []);
+        $case = config('key-case.request_case', 'snake');;
 
-        return array_merge(
-            $ignoreRoutes,
-            $ignoreRequestRoutes,
-        );
+        return new KeyTransformer($case);
+    }
+
+    private function shouldIgnoreRoute(string $route): bool
+    {
+        return in_array($route, array_merge(
+            config('key-case.ignore', []),
+            config('key-case.ignore_request', [])
+        ));
     }
 }

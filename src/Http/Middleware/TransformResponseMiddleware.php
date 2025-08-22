@@ -3,7 +3,9 @@
 namespace Teners\LaravelKeyCase\Http\Middleware;
 
 use Closure;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpFoundation\Response;
 use Teners\LaravelKeyCase\Services\KeyTransformer;
 
@@ -20,36 +22,63 @@ class TransformResponseMiddleware
     {
         $response = $next($request);
 
-        $currentRoute = $request->path();
+        if ($this->shouldIgnoreRoute($request->path())) {
+            return $response;
+        }
 
-        if (in_array($currentRoute, $this->getRoutesToIgnore())) {
+        if (!$this->isJsonResponse($response)) {
             return $response;
         }
 
         $content = $response->getContent();
 
-        $case = config('key-case.response_case', 'camel');
+        try {
+            $transformer = $this->getTransformer();
+            $converted = $transformer->convertKeys(json_decode($content));
 
-        $converted = (new KeyTransformer($case))->convertKeys(json_decode($content));
+            $response->setContent(json_encode($converted, JSON_UNESCAPED_UNICODE | JSON_PRESERVE_ZERO_FRACTION));
+        } catch (\Exception $e) {
+            config('app.debug') && throw new $e;
 
-        $response->setContent(json_encode($converted));
+            Log::warning('Key transformation failed for response', [
+                'route' => $request->path(),
+                'error' => $e->getMessage(),
+                'trace' => $e->getTrace(),
+            ]);
+        }
 
         return $response;
     }
 
     /**
-     * Get the list of routes to ignore for request transformation.
-     *
-     * @return array
+     * Check if response is JSON
      */
-    private function getRoutesToIgnore(): array
+    private function isJsonResponse(Response $response): bool
     {
-        $ignoreRoutes = config('key-case.ignore', []);
-        $ignoreResponseRoutes = config('key-case.ignore_response', []);
+        if ($response instanceof JsonResponse) {
+            return true;
+        }
 
-        return array_merge(
-            $ignoreRoutes,
-            $ignoreResponseRoutes,
-        );
+        $contentType = $response->headers->get('content-type', '');
+        return str_contains($contentType, 'application/json') ||
+            str_contains($contentType, 'text/json');
+    }
+
+    /**
+     * Get transformer instance
+     */
+    private function getTransformer(): KeyTransformer
+    {
+        $case = config('key-case.response_case', 'camel');
+
+        return new KeyTransformer($case);
+    }
+
+    private function shouldIgnoreRoute(string $route): bool
+    {
+        return in_array($route, array_merge(
+            config('key-case.ignore', []),
+            config('key-case.ignore_response', [])
+        ));
     }
 }
