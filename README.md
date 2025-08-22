@@ -1,130 +1,273 @@
-Laravel Key Case
-=
-A Laravel package that transforms request and response data keys.
+# Laravel Key Case
+
+A high-performance Laravel package that automatically transforms request and response data keys between different naming conventions (camelCase ↔ snake_case, kebab-case, etc.).
 
 [![Latest Version on Packagist](https://img.shields.io/packagist/v/teners/laravel-key-case.svg?style=flat-square)](https://packagist.org/packages/teners/laravel-key-case)
 [![GitHub Tests Action Status](https://img.shields.io/github/actions/workflow/status/Teners-net/laravel-key-case/tests.yml?branch=main&label=Tests)](https://github.com/Teners-net/laravel-key-case/actions?query=workflow%3ATests+branch%3Amain)
-[![issues](https://img.shields.io/github/issues/Teners-net/laravel-key-case?style=flat-square)](https://github.com/Teners-net/laravel-key-case/issues)
-[![stars](https://img.shields.io/github/stars/Teners-net/laravel-key-case?style=flat-square)](https://github.com/Teners-net/laravel-key-case/issues)
-[![GitHub license](https://img.shields.io/github/license/Teners-net/laravel-key-case?style=flat-square)](https://github.com/Teners-net/laravel-key-case/blob/main/LICENSE.md)
+[![Issues](https://img.shields.io/github/issues/Teners-net/laravel-key-case?style=flat-square)](https://github.com/Teners-net/laravel-key-case/issues)
+[![Stars](https://img.shields.io/github/stars/Teners-net/laravel-key-case?style=flat-square)](https://github.com/Teners-net/laravel-key-case/stargazers)
+[![GitHub License](https://img.shields.io/github/license/Teners-net/laravel-key-case?style=flat-square)](https://github.com/Teners-net/laravel-key-case/blob/main/LICENSE.md)
 [![Total Downloads](https://img.shields.io/packagist/dt/teners/laravel-key-case.svg?style=flat-square)](https://packagist.org/packages/teners/laravel-key-case)
 
+## 🎯 Why Laravel Key Case?
 
-## Why?
-It is a common convention to work with camel case in Javascript and most front-end technologies and snake case in PHP (Backend), this package makes that a breeze as you can work with your data columns just as you like in laravel and your responces or request data are automatically converted to any case.
+Bridge the gap between frontend and backend naming conventions effortlessly. Work with your preferred naming style in both JavaScript (camelCase) and PHP (snake_case) without manual conversion.
 
-## Installation
+## 📦 Installation
 
-Install Laravel Key Case, run the following command in your terminal:
+Install via Composer:
 
 ```bash
 composer require teners/laravel-key-case
 ```
 
-#### Publish the package configuration file
+### Publish Configuration (Optional)
 
 ```bash
 php artisan vendor:publish --provider="Teners\LaravelKeyCase\LaravelKeyCaseServiceProvider" --tag="key-case-config"
 ```
-You can then customize what case to use for each of the request and the response data.
 
-#### Use the middlewares
+## Quick Start
 
-This package includes two middlewares
-- `TransformResponseMiddleware`: Transforms response data keys.
-- `TransformRequestMiddleware`: Transforms request data keys.
+### Laravel 11
 
-You can register their aliases (or use them dirrectly on the api route group if you are using them through the api) for easy reference elsewhere in your app:
-
-In Laravel 11 open `/bootstrap/app.php` and register them there:
+Register middleware in `bootstrap/app.php`:
 
 ```php
-    ->withMiddleware(function (Middleware $middleware) {
-        $middleware->api(append: [
-            \Teners\LaravelKeyCase\Http\Middleware\TransformResponseMiddleware:class,
-        ]);
-    })
+<?php
 
-    // Or to use on individual routes
-    
+use Illuminate\Foundation\Application;
+use Illuminate\Foundation\Configuration\Exceptions;
+use Illuminate\Foundation\Configuration\Middleware;
+
+return Application::configure(basePath: dirname(__DIR__))
+    ->withRouting(
+        web: __DIR__.'/../routes/web.php',
+        api: __DIR__.'/../routes/api.php',
+        commands: __DIR__.'/../routes/console.php',
+        health: '/up',
+    )
     ->withMiddleware(function (Middleware $middleware) {
+        // Apply to all API routes
+        $middleware->api(append: [
+            \Teners\LaravelKeyCase\Http\Middleware\TransformResponseMiddleware::class,
+            \Teners\LaravelKeyCase\Http\Middleware\TransformRequestMiddleware::class,
+        ]);
+
+        // Or register aliases for individual routes
         $middleware->alias([
-            'convert-response-key' => \Teners\LaravelKeyCase\Http\Middleware\TransformResponseMiddleware:class,
+            'transform-request' => \Teners\LaravelKeyCase\Http\Middleware\TransformRequestMiddleware::class,
+            'transform-response' => \Teners\LaravelKeyCase\Http\Middleware\TransformResponseMiddleware::class,
         ]);
     })
+    ->withExceptions(function (Exceptions $exceptions) {
+        //
+    })->create();
 ```
 
-In Laravel 9 and 10 you can add them in `/app/Http/Kernel.php`:
+### Older laravel versions
+
+Add to `app/Http/Kernel.php`:
 
 ```php
+<?php
+
+namespace App\Http;
+
+use Illuminate\Foundation\Http\Kernel as HttpKernel;
+
+class Kernel extends HttpKernel
+{
     protected $middlewareGroups = [
         'web' => [
-            ...
+            // ... other middleware
         ],
 
         'api' => [
-            ...
-            TransformResponseMiddleware::class,
+            // ... other middleware
+            \Teners\LaravelKeyCase\Http\Middleware\TransformResponseMiddleware::class,
+            \Teners\LaravelKeyCase\Http\Middleware\TransformRequestMiddleware::class,
         ],
     ];
 
-    // Or to use on individual routes
-
-    // Laravel 9 uses $routeMiddleware = [
-    //protected $routeMiddleware = [
-    // Laravel 10+ uses $middlewareAliases = [
+    // For individual route usage
     protected $middlewareAliases = [
-        // ...
-        'convert-response-key' => \Teners\LaravelKeyCase\Http\Middleware\TransformResponseMiddleware:class,
+        // ... other aliases
+        'transform-request' => \Teners\LaravelKeyCase\Http\Middleware\TransformRequestMiddleware::class,
+        'transform-response' => \Teners\LaravelKeyCase\Http\Middleware\TransformResponseMiddleware::class,
     ];
+}
 ```
 
-### Ignoring Routes
-You can specify routes to be ignored for request and response transformation in the configuration file:
+## Configuration
+
+The package works with zero configuration, but you can customize it by publishing the config file:
 
 ```php
+<?php
+
 return [
-    // Other configuration options...
+    /**
+     * Response Key Case - Transform API response keys
+     * Options: camel, snake, kebab, studly, lower, upper, ucfirst, ucwords, singular, plural, slug, title
+     */
+    'response_case' => env('RESPONSE_CASE', 'camel'),
 
+    /**
+     * Request Key Case - Transform incoming request keys
+     * Options: camel, snake, kebab, studly, lower, upper, ucfirst, ucwords, singular, plural, slug, title
+     */
+    'request_case' => env('REQUEST_CASE', 'snake'),
+
+    /**
+     * Performance Settings
+     */
+    'max_depth' => env('KEY_CASE_MAX_DEPTH', 10),
+
+    /**
+     * Route Exclusions
+     */
     'ignore' => [
-        // Common routes to ignore for both request and response transformation
+        'health-check',
     ],
 
-    'ignore_request' => [
-        // List of routes to ignore for request transformation
-    ],
-
-    'ignore_response' => [
-        // List of routes to ignore for response transformation
-    ],
+    'ignore_request' => [],
+    'ignore_response' => [],
 ];
 ```
 
-Route listed in the `ignore` will not be transformed for bothe the resquest and response, while those in the `ignore_request` will not be transformed for only the request, and those in `ignore_response` will be ignored for the response transformation.
+## 📖 Usage Examples
+
+### Basic API Transformation
+
+**Frontend (JavaScript)**
+
+```javascript
+// Send camelCase data
+const userData = {
+    firstName: "John",
+    lastName: "Doe",
+    emailAddress: "john@example.com",
+};
+
+fetch("/api/users", {
+    method: "POST",
+    body: JSON.stringify(userData),
+});
+```
+
+**Backend (Laravel)**
+
+```php
+<?php
+
+// Automatically received as snake_case
+public function store(Request $request)
+{
+    $validated = $request->validate([
+        'first_name' => 'required|string',
+        'last_name' => 'required|string',
+        'email_address' => 'required|email',
+    ]);
+
+    User::create($validated);
+
+    return response()->json([
+        'user_id' => $user->id,
+        'created_at' => $user->created_at,
+    ]);
+    // Automatically transformed to camelCase: {"userId": 1, "createdAt": "2024-01-01T12:00:00Z"}
+}
+```
+
+### Route-Specific Control
+
+```php
+<?php
+
+// Apply to specific routes
+Route::middleware(['transform-response'])->group(function () {
+    Route::get('/users', [UserController::class, 'index']);
+    Route::post('/users', [UserController::class, 'store']);
+});
+
+// Skip transformation for specific routes
+Route::get('/legacy-api/data', function () {
+    // This route will be ignored
+});
+```
+
+## Supported Case Types
+
+| Case Type  | Example               | Use Case              |
+| ---------- | --------------------- | --------------------- |
+| `camel`    | `firstName`           | JavaScript, JSON APIs |
+| `snake`    | `first_name`          | PHP, Database columns |
+| `kebab`    | `first-name`          | URLs, CSS classes     |
+| `studly`   | `FirstName`           | Class names           |
+| `lower`    | `firstname`           | Simple keys           |
+| `upper`    | `FIRSTNAME`           | Constants             |
+| `ucfirst`  | `Firstname`           | Sentences             |
+| `ucwords`  | `First Name`          | Titles                |
+| `singular` | `user` (from `users`) | Model names           |
+| `plural`   | `users` (from `user`) | Collections           |
+| `slug`     | `first-name`          | URLs                  |
+| `title`    | `First Name`          | Display text          |
+
+### Error Resilience
+
+-   Non-blocking - errors won't break your requests
+
+## 🧪 Testing
+
+Run the test suite:
+
+```bash
+# Run all tests
+composer test
+```
 
 ## Contributions
+
 Contributions are **welcome** via Pull Requests on [Github](https://github.com/Teners-net/laravel-key-case).
-- Please document any change you made as neccesary in the [README.md](README.md).
-- Pleas make only one pull request per feature/fix.
+
+-   Please document any change you made as neccesary in the README.md.
+-   Follow PSR-12 coding standards
+-   Write tests for new features
+-   Update documentation for any changes
+-   Make one pull request per feature/fix
+-   Ensure all tests pass
 
 ## Issues
+
 Please report any issue you encounter in using the package through the [Github Issues](https://github.com/Teners-net/laravel-key-case/issues) tab.
 
+When reporting issues, please include:
+
+-   Laravel version
+-   PHP version
+-   Package version
+-   Code example
+-   Error messages
+
 ## Testing
+
 To run tests, use:
 
-``` bash
+```bash
 composer test
 ```
 
 ## Credits
 
-- [Emmanuel Adesina](https://github.com/ThePlatinum)
-
-### Contributors
+-   [Emmanuel Adesina](https://github.com/ThePlatinum)
 
 Contributors list will be added here
 
 ## License
 
 The MIT License (MIT). Please see [License File](LICENSE.md) for more information.
+
+<div align="center" style="margin-top: 50px">
+<p>Made with ❤️ by <a href="https://teners.net">Teners</a>  - if this package helped you ⭐ <a href="https://github.com/Teners-net/laravel-key-case">Star us on GitHub</a></p>
+</div>

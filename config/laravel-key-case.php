@@ -52,5 +52,5 @@ return [
      * Maximum recursion depth for nested arrays/objects
      * Prevents infinite loops and excessive memory usage
      */
-    'max_depth' => env('KEY_CASE_MAX_DEPTH', 10),
+    'max_depth' => env('KEY_CASE_MAX_DEPTH', 15),
 ];
