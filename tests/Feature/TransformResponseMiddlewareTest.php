@@ -9,6 +9,15 @@ use Teners\LaravelKeyCase\Tests\TestCase;
 
 class TransformResponseMiddlewareTest extends TestCase
 {
+    private TransformResponseMiddleware $middleware;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->middleware = new TransformResponseMiddleware();
+    }
+
     /**
      * Responce data keys are transformed
      */
@@ -25,9 +34,7 @@ class TransformResponseMiddlewareTest extends TestCase
             $testData
         );
 
-        $middleware  = new TransformResponseMiddleware();
-
-        $response = $middleware->handle($request, function () use ($testData) {
+        $response = $this->middleware->handle($request, function () use ($testData) {
             return response()->json($testData);
         });
 
@@ -49,8 +56,6 @@ class TransformResponseMiddlewareTest extends TestCase
     {
         Config::set('key-case.ignore_response', ['api/ignore-this-route']);
 
-        $middleware = new TransformResponseMiddleware();
-
         $request = Request::create(
             'api/ignore-this-route',
             'GET',
@@ -62,12 +67,25 @@ class TransformResponseMiddlewareTest extends TestCase
             'SomeOtherKinds' => "SomeOtherKindsOfValue"
         ];
 
-        $response = $middleware->handle($request, function () use ($expectedResponse) {
+        $response = $this->middleware->handle($request, function () use ($expectedResponse) {
             return response()->json($expectedResponse);
         });
 
         $result = json_decode($response->getContent(), true);
 
         $this->assertEquals($expectedResponse, $result);
+    }
+
+    public function test_response_middleware_handles_non_json()
+    {
+        $request = Request::create('/', 'GET');
+
+        $response = $this->middleware->handle($request, function () {
+            return response('<html><body>Not JSON</body></html>', 200, [
+                'Content-Type' => 'text/html'
+            ]);
+        });
+
+        $this->assertEquals('<html><body>Not JSON</body></html>', $response->getContent());
     }
 }

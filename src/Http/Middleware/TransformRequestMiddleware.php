@@ -11,44 +11,41 @@ class TransformRequestMiddleware
 {
     /**
      * Handle an incoming request.
-     *
-     * @param Request $request
-     * @param \Closure $next
-     * @return mixed
      */
     public function handle(Request $request, Closure $next): Response
     {
-        $content = $request->all();
-
-        $currentRoute = $request->path();
-
-        if (in_array($currentRoute, $this->getRoutesToIgnore())) {
+        if ($this->shouldIgnoreRoute($request->path())) {
             return $next($request);
         }
 
-        $case = config('key-case.request_case', 'snake');
+        $content = $request->all();
+        if (empty($content)) {
+            return $next($request);
+        }
 
-        $converted = (new KeyTransformer($case))->convertKeys($content);
+        $transformer = $this->getTransformer();
 
+        $converted = $transformer->convertKeys($content);
         $request->replace($converted);
-
 
         return $next($request);
     }
 
     /**
-     * Get the list of routes to ignore for request transformation.
-     *
-     * @return array
+     * Get transformer instance
      */
-    private function getRoutesToIgnore(): array
+    private function getTransformer(): KeyTransformer
     {
-        $ignoreRoutes = config('key-case.ignore', []);
-        $ignoreRequestRoutes = config('key-case.ignore_request', []);
+        $case = config('key-case.request_case', 'snake');;
 
-        return array_merge(
-            $ignoreRoutes,
-            $ignoreRequestRoutes,
-        );
+        return new KeyTransformer($case);
+    }
+
+    private function shouldIgnoreRoute(string $route): bool
+    {
+        return in_array($route, array_merge(
+            config('key-case.ignore', []),
+            config('key-case.ignore_request', [])
+        ));
     }
 }

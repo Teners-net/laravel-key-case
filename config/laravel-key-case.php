@@ -33,7 +33,10 @@ return [
     /**
      * Routes to ignore for both request and transformation
      */
-    'ignore' => [],
+    'ignore' => [
+        // Common routes that should not be transformed
+        'health-check',
+    ],
 
     /**
      * List of routes to ignore for request transformation
@@ -44,4 +47,10 @@ return [
      * List of routes to ignore for response transformation
      */
     'ignore_response' => [],
+
+    /**
+     * Maximum recursion depth for nested arrays/objects
+     * Prevents infinite loops and excessive memory usage
+     */
+    'max_depth' => env('KEY_CASE_MAX_DEPTH', 10),
 ];
